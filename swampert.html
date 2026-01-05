@@ -1,710 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat with Mega Swampert</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #2e3a56;
-            color: white;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8" />
+  <title>Chat with Mega Swampert</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #2f3e5c;
+      color: #e6f1ff;
+    }
 
-        .chat-container {
-            width: 80%;
-            max-width: 800px;
-            margin: 50px auto;
-            background-color: #1c2530;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-            position: relative;
-            resize: both;
-            overflow: auto;
-            min-width: 320px;
-            min-height: 240px;
-        }
+    .container {
+      display: flex;
+      height: 100vh;
+    }
 
-        /* layout variants for avatar positioning */
-        .chat-container.position-right { flex-direction: row; }
-        .chat-container.position-right .sidebar { order: 2; }
-        .chat-container.position-right .main { order: 1; }
+    .avatar {
+      width: 40%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .chat-container.position-top { flex-direction: column; }
-        .chat-container.position-top .sidebar { order: 0; width: 160px; }
-        .chat-container.position-top .main { order: 1; }
+    .avatar img {
+      max-width: 90%;
+      border-radius: 50%;
+      border: 4px solid #1cc6ff;
+    }
 
-        .chat-container.position-bottom { flex-direction: column; }
-        .chat-container.position-bottom .sidebar { order: 2; width: 160px; }
-        .chat-container.position-bottom .main { order: 1; }
+    .chat {
+      width: 60%;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      background: #1f2a3d;
+    }
 
-        .chat-container.drag-over { outline: 3px dashed rgba(0,204,255,0.25); }
+    h1 {
+      margin: 0 0 10px 0;
+      text-align: center;
+      color: #1cc6ff;
+    }
 
-        .header {
-            position: relative;
-            text-align: center;
-            margin-bottom: 20px;
-        }
+    #chatMessages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      border-radius: 8px;
+      background: #162033;
+    }
 
-        .header-controls {
-            position: fixed;
-            top: 8px;
-            right: 8px;
-            z-index: 10001;
-            display: flex;
-            gap: 8px;
-            background: transparent;
-            padding: 4px;
-        }
+    .message {
+      margin-bottom: 10px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      max-width: 80%;
+      line-height: 1.4;
+    }
 
-        .avatar-size-control {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: #cfeff6;
-            font-size: 12px;
-        }
+    .user {
+      background: #1cc6ff;
+      color: #000;
+      margin-left: auto;
+    }
 
-        .avatar-size-control input[type="range"] { width: 120px; }
+    .bot {
+      background: #2b7cff;
+      color: #fff;
+      margin-right: auto;
+    }
 
-        .container-size-control {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: #cfeff6;
-            font-size: 12px;
-        }
+    .input-bar {
+      display: flex;
+      margin-top: 10px;
+    }
 
-        .container-size-control input[type="range"] { width: 100px; }
+    #messageInput {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+    }
 
-        .header-controls button {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: #cfeff6;
-            padding: 6px 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
+    #sendBtn {
+      margin-left: 10px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      background: #1cc6ff;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-        .header h1 {
-            font-size: 36px;
-            color: #00cfff;
-        }
-
-        .messages {
-            height: 400px;
-            overflow-y: scroll;
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #4a5568;
-            border-radius: 8px;
-            background-color: #1e293b;
-        }
-
-        .messages .message {
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            background-color: #4a5568;
-        }
-
-        .messages .message.user {
-            background-color: #05386b;
-            text-align: right;
-        }
-
-        .messages .message.bot {
-            background-color: #256d85;
-            text-align: left;
-        }
-        .sidebar {
-            width: 160px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        .profile-avatar {
-            width: 320px;
-            height: 320px;
-            border-radius: 50%;
-            object-fit: cover;
-            display: block;
-            margin-top: 4px;
-            border: 4px solid rgba(0, 204, 255, 0.18);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.45);
-        }
-
-        /* removed shrinking behavior: avatar remains constant size */
-
-        .position-controls {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 8px;
-        }
-
-        .position-controls button {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.06);
-            color: #cfeff6;
-            padding: 6px 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .position-controls button.active {
-            background: #00cfff;
-            color: #012033;
-            border-color: rgba(0,0,0,0.1);
-        }
-
-        /* Free-mode: avatar positioned absolutely inside the container */
-        .chat-container.position-free .profile-avatar {
-            position: absolute;
-            transform: translate(0,0);
-            left: 8px;
-            top: 8px;
-            margin: 0;
-            z-index: 30;
-            cursor: grab;
-        }
-
-        .chat-container.position-free .sidebar { width: 160px; }
-
-        @media (max-width: 700px) {
-            .chat-container { flex-direction: column; }
-            .sidebar { width: 100%; }
-            .profile-avatar { width: 96px; height: 96px; margin: 0 auto 8px auto; }
-        }
-        .input-container {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .input-container input {
-            width: 80%;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        .input-container button {
-            width: 15%;
-            background-color: #00cfff;
-            color: white;
-            border: none;
-            padding: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 8px;
-        }
-
-        .input-container button:hover {
-            background-color: #1e90ff;
-        }
-
-        .swampert-image {
-            width: 100%;
-            max-width: 400px;
-            margin-top: 20px;
-        }
-        /* Draggable container visual state */
-        .chat-container.dragging { cursor: grabbing; }
-    </style>
+    #sendBtn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="sidebar">
-            <img class="profile-avatar" src="https://i.imgur.com/VTtp2NS.jpeg" alt="Mega Swampert avatar" />
-        </div>
-
-        <div class="main">
-            <div class="header">
-                <h1>Chat with Mega Swampert</h1>
-                <div class="header-controls">
-                    <div class="avatar-size-control">
-                        <label for="avatarSizeRange">Avatar</label>
-                        <input id="avatarSizeRange" type="range" min="64" max="900" step="8" />
-                        <span id="avatarSizeVal">320</span>
-                    </div>
-                    <div class="container-size-control">
-                        <label for="containerWidthRange">Width</label>
-                        <input id="containerWidthRange" type="range" min="320" max="1200" step="8" />
-                        <span id="containerWidthVal">800</span>
-                        <label for="containerHeightRange">Height</label>
-                        <input id="containerHeightRange" type="range" min="240" max="1000" step="8" />
-                        <span id="containerHeightVal">480</span>
-                    </div>
-                    <button id="resetPosBtn" title="Reset chat position">Reset</button>
-                    <button id="resetAvatarBtn" title="Reset avatar position">Reset Avatar</button>
-                </div>
-            </div>
-
-            <div class="messages" id="chatMessages">
-            <!-- Messages will appear here -->
-        </div>
-
-        <div class="input-container">
-            <input type="text" id="userMessage" placeholder="Say something..." />
-            <button id="sendBtn">Send</button>
-        </div>
-        </div>
+  <div class="container">
+    <div class="avatar">
+      <!-- Replace src with your image path if desired -->
+      <img src="swampert.png" alt="Mega Swampert" />
     </div>
 
-        <script>
-        // Avatar position controls: apply class on .chat-container and persist in localStorage
-        (function() {
-            const container = document.querySelector('.chat-container');
-            const buttons = document.querySelectorAll('.position-controls button');
+    <div class="chat">
+      <h1>Chat with Mega Swampert</h1>
 
-            const setPosition = window.setAvatarPosition = function(pos) {
-                container.classList.remove('position-left','position-right','position-top','position-bottom');
-                const cls = pos === 'left' ? 'position-left' : `position-${pos}`;
-                container.classList.add(cls);
-                localStorage.setItem('swampert-avatar-pos', pos);
-                buttons.forEach(b => b.classList.toggle('active', b.dataset.pos === pos));
-            };
+      <div id="chatMessages">
+        <div class="message user">Hello! What's your name?</div>
+      </div>
 
-            buttons.forEach(b => b.addEventListener('click', () => setPosition(b.dataset.pos)));
+      <div class="input-bar">
+        <input
+          id="messageInput"
+          type="text"
+          placeholder="Say something..."
+          onkeydown="if(event.key==='Enter'){sendMessage()}"
+        />
+        <button id="sendBtn" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
 
-            // Initialize from saved preference or default to left
-            const saved = localStorage.getItem('swampert-avatar-pos') || 'left';
-            setPosition(saved);
-        })();
+  <script>
+    const messageInput = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
 
-        // Make avatar draggable across the viewport and persist its position
-        (function() {
-            const avatar = document.querySelector('.profile-avatar');
-            if (!avatar) return;
+    function addMessage(text, sender) {
+      const chatBox = document.getElementById("chatMessages");
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+      msg.textContent = text;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-            let draggingAvatar = false;
-            let startX = 0, startY = 0, origLeft = 0, origTop = 0;
-            let offsetX = 0, offsetY = 0;
-            function toInt(v){ return parseFloat(v) || 0; }
+    async function sendMessage() {
+      const userMessage = messageInput.value.trim();
+      if (!userMessage) return;
 
-            // load saved avatar position (viewport coordinates)
-            try {
-                const raw = localStorage.getItem('swampert-avatar-pos-viewport');
-                if (raw) {
-                    const p = JSON.parse(raw);
-                    avatar.style.position = 'fixed';
-                    avatar.style.left = (p.left || 0) + 'px';
-                    avatar.style.top = (p.top || 0) + 'px';
-                    avatar.style.margin = '0';
-                    avatar.style.transform = 'none';
-                    avatar.style.zIndex = 9999;
-                }
-            } catch (e) {}
+      addMessage(userMessage, "user");
+      messageInput.value = "";
+      sendBtn.disabled = true;
 
-            const container = document.querySelector('.chat-container');
+      try {
+        const resp = await fetch(
+          "https://chat-backend-sa6e.onrender.com/api/chat",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: userMessage }),
+          }
+        );
 
-            function updateAvatarSize() {
-                // no-op: avatar size remains constant
-            }
+        const data = await resp.json();
 
-            avatar.addEventListener('pointerdown', (e) => {
-                // only start dragging with primary button
-                if (e.button !== 0) return;
-                e.preventDefault();
-                draggingAvatar = true;
-                avatar.setPointerCapture(e.pointerId);
-                startX = e.clientX;
-                startY = e.clientY;
-                const rect = avatar.getBoundingClientRect();
-                // calculate pointer offset inside the avatar to avoid jumps
-                offsetX = startX - rect.left;
-                offsetY = startY - rect.top;
-                // switch to fixed positioning so avatar can move outside container
-                if (getComputedStyle(avatar).position !== 'fixed') {
-                    avatar.style.position = 'fixed';
-                    avatar.style.left = rect.left + 'px';
-                    avatar.style.top = rect.top + 'px';
-                    avatar.style.margin = '0';
-                    avatar.style.transform = 'none';
-                    avatar.style.zIndex = 9999;
-                }
-                origLeft = toInt(avatar.style.left);
-                origTop = toInt(avatar.style.top);
-            });
-
-            document.addEventListener('pointermove', (e) => {
-                if (!draggingAvatar) return;
-                // position avatar so pointer stays at the same offset inside it
-                const newLeft = e.clientX - offsetX;
-                const newTop = e.clientY - offsetY;
-                avatar.style.left = newLeft + 'px';
-                avatar.style.top = newTop + 'px';
-                updateAvatarSize();
-            });
-
-            document.addEventListener('pointerup', (e) => {
-                if (!draggingAvatar) return;
-                draggingAvatar = false;
-                try { avatar.releasePointerCapture(e.pointerId); } catch (err) {}
-                try {
-                    localStorage.setItem('swampert-avatar-pos-viewport', JSON.stringify({ left: toInt(avatar.style.left), top: toInt(avatar.style.top) }));
-                } catch (err) {}
-                updateAvatarSize();
-            });
-
-            // Reset avatar position back into the sidebar
-            const resetAvatarBtn = document.getElementById('resetAvatarBtn');
-            if (resetAvatarBtn) {
-                resetAvatarBtn.addEventListener('click', () => {
-                    try { localStorage.removeItem('swampert-avatar-pos-viewport'); } catch (e) {}
-                    avatar.style.position = '';
-                    avatar.style.left = '';
-                    avatar.style.top = '';
-                    avatar.style.marginTop = '4px';
-                    avatar.style.transform = '';
-                    avatar.style.zIndex = '';
-                    avatar.classList.remove('small');
-                    // reset size to default
-                    try { localStorage.removeItem('swampert-avatar-size'); } catch (e) {}
-                    const range = document.getElementById('avatarSizeRange');
-                    const val = 320;
-                    if (range) range.value = val;
-                    const display = document.getElementById('avatarSizeVal');
-                    if (display) display.textContent = val;
-                    avatar.style.width = val + 'px';
-                    avatar.style.height = val + 'px';
-                });
-            }
-
-            // Avatar size control setup
-            (function() {
-                const range = document.getElementById('avatarSizeRange');
-                const display = document.getElementById('avatarSizeVal');
-                if (!range || !display) return;
-                // load saved size or default
-                let savedSize = 320;
-                try { savedSize = parseInt(localStorage.getItem('swampert-avatar-size')) || savedSize; } catch (e) {}
-                range.value = savedSize;
-                display.textContent = savedSize;
-                avatar.style.width = savedSize + 'px';
-                avatar.style.height = savedSize + 'px';
-
-                range.addEventListener('input', (e) => {
-                    const v = parseInt(e.target.value);
-                    display.textContent = v;
-                    avatar.style.width = v + 'px';
-                    avatar.style.height = v + 'px';
-                    try { localStorage.setItem('swampert-avatar-size', String(v)); } catch (err) {}
-                });
-            })();
-
-            // Message-area size sliders: wire up width/height range controls for the inner chat box
-            (function() {
-                const messagesEl = document.getElementById('chatMessages');
-                const wRange = document.getElementById('containerWidthRange');
-                const hRange = document.getElementById('containerHeightRange');
-                const wDisplay = document.getElementById('containerWidthVal');
-                const hDisplay = document.getElementById('containerHeightVal');
-                if (!messagesEl || !wRange || !hRange || !wDisplay || !hDisplay) return;
-
-                // set sensible max values based on viewport
-                const maxW = Math.max(1200, Math.round(window.innerWidth * 0.9));
-                const maxH = Math.max(600, Math.round(window.innerHeight * 0.8));
-                wRange.max = maxW;
-                hRange.max = maxH;
-
-                // load saved message area size or use current size
-                try {
-                    const raw = localStorage.getItem('swampert-messages-size');
-                    if (raw) {
-                        const sz = JSON.parse(raw);
-                        if (sz.width) messagesEl.style.width = sz.width + 'px';
-                        if (sz.height) messagesEl.style.height = sz.height + 'px';
-                    }
-                } catch (e) {}
-
-                const rect = messagesEl.getBoundingClientRect();
-                const curW = Math.round(rect.width) || 600;
-                const curH = Math.round(rect.height) || 400;
-                wRange.value = curW;
-                hRange.value = curH;
-                wDisplay.textContent = wRange.value;
-                hDisplay.textContent = hRange.value;
-
-                function applySize(w, h) {
-                    if (w) messagesEl.style.width = w + 'px';
-                    if (h) messagesEl.style.height = h + 'px';
-                    try { localStorage.setItem('swampert-messages-size', JSON.stringify({ width: Math.round(messagesEl.getBoundingClientRect().width), height: Math.round(messagesEl.getBoundingClientRect().height) })); } catch (e) {}
-                }
-
-                wRange.addEventListener('input', (e) => {
-                    const v = parseInt(e.target.value);
-                    wDisplay.textContent = v;
-                    applySize(v);
-                });
-
-                hRange.addEventListener('input', (e) => {
-                    const v = parseInt(e.target.value);
-                    hDisplay.textContent = v;
-                    applySize(undefined, v);
-                });
-            })();
-        })();
-
-        // Drag and drop support for avatar: drop anywhere on container to set position
-        (function() {
-            const container = document.querySelector('.chat-container');
-            const avatar = document.querySelector('.profile-avatar');
-            if (!container || !avatar || !window.setAvatarPosition) return;
-
-            avatar.setAttribute('draggable', 'true');
-
-            avatar.addEventListener('dragstart', (e) => {
-                try { e.dataTransfer.setData('text/plain', 'avatar'); } catch (err) {}
-                avatar.classList.add('dragging');
-            });
-
-            container.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                container.classList.add('drag-over');
-            });
-
-            container.addEventListener('dragleave', () => {
-                container.classList.remove('drag-over');
-            });
-
-            container.addEventListener('drop', (e) => {
-                e.preventDefault();
-                container.classList.remove('drag-over');
-                avatar.classList.remove('dragging');
-
-                const rect = container.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
-                // If free mode is active, save percent coords and enable free position
-                const savedMode = localStorage.getItem('swampert-avatar-pos') || 'left';
-                if (savedMode === 'free') {
-                    const pctX = Math.max(0, Math.min(1, x / rect.width));
-                    const pctY = Math.max(0, Math.min(1, y / rect.height));
-                    localStorage.setItem('swampert-avatar-free-pos', JSON.stringify({ x: pctX, y: pctY }));
-                    // apply immediately
-                    const px = pctX * rect.width;
-                    const py = pctY * rect.height;
-                    avatar.style.left = px + 'px';
-                    avatar.style.top = py + 'px';
-                    return;
-                }
-
-                // Decide position by thirds: top/bottom priority, otherwise left/right
-                let pos = 'left';
-                if (y < rect.height / 3) pos = 'top';
-                else if (y > (rect.height * 2) / 3) pos = 'bottom';
-                else pos = (x < rect.width / 2) ? 'left' : 'right';
-
-                window.setAvatarPosition(pos);
-            });
-        })();
-
-        // Free-drag pointer implementation disabled (conflicts with newer avatar handlers)
-        (function() { return; })();
-        const messageInput = document.getElementById('userMessage');
-        const chatMessages = document.getElementById('chatMessages');
-        const sendBtn = document.getElementById('sendBtn');
-
-        // Autofocus the input
-        messageInput.focus();
-
-        // Send on button click or Enter key
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        async function sendMessage() {
-            const userMessage = messageInput.value.trim();
-            if (!userMessage) return;
-
-            // Display user's message
-            const userMessageElement = document.createElement('div');
-            userMessageElement.classList.add('message', 'user');
-            userMessageElement.textContent = userMessage;
-            chatMessages.appendChild(userMessageElement);
-
-            // Prepare bot placeholder
-            const botMessageElement = document.createElement('div');
-            botMessageElement.classList.add('message', 'bot');
-            botMessageElement.textContent = 'Mega Swampert is thinking...';
-            chatMessages.appendChild(botMessageElement);
-
-            // Scroll to the bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            // Disable input while waiting
-            sendBtn.disabled = true;
-            messageInput.value = '';
-
-            try {
-                const resp = await fetch('https://chat-backend-sa6e.onrender.com/api/chat', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    message: userMessage
-  })
-});
-
-
-                if (!resp.ok) {
-                    const err = await resp.json().catch(() => ({}));
-                    botMessageElement.textContent = 'Error: ' + (err.error || resp.statusText);
-                } else {
-                    const data = await resp.json();
-                    botMessageElement.textContent = data.reply || 'Mega Swampert is silent.';
-                }
-            } catch (err) {
-                botMessageElement.textContent = 'Network error: ' + err.message;
-            } finally {
-                sendBtn.disabled = false;
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                messageInput.focus();
-            }
+        if (!resp.ok) {
+          addMessage("Error: " + (data.error || "Unknown error"), "bot");
+        } else {
+          addMessage(data.reply, "bot");
         }
-
-        // Make the chat container draggable by its header so the user can reposition it
-        (function() {
-            const container = document.querySelector('.chat-container');
-            const header = document.querySelector('.header');
-            if (!container || !header) return;
-
-            let dragging = false;
-            let startX = 0, startY = 0;
-            let origLeft = 0, origTop = 0;
-
-            function toInt(v){ return parseFloat(v) || 0; }
-
-            header.style.touchAction = 'none'; // prevent default touch gestures
-
-            header.addEventListener('pointerdown', (e) => {
-                // don't start dragging when interacting with header controls (slider, buttons, labels)
-                try {
-                    if (e.target && e.target.closest && e.target.closest('.header-controls')) return;
-                    const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
-                    if (tag === 'INPUT' || tag === 'BUTTON' || tag === 'LABEL') return;
-                } catch (err) {}
-                e.preventDefault();
-                dragging = true;
-                container.classList.add('dragging');
-
-                // Ensure container uses absolute positioning so we can move it
-                const rect = container.getBoundingClientRect();
-                // If container is centered via margins, capture its current position
-                container.style.position = 'absolute';
-                container.style.margin = '0';
-                container.style.left = rect.left + 'px';
-                container.style.top = rect.top + 'px';
-
-                startX = e.clientX;
-                startY = e.clientY;
-                origLeft = toInt(container.style.left);
-                origTop = toInt(container.style.top);
-                header.setPointerCapture(e.pointerId);
-            });
-
-            document.addEventListener('pointermove', (e) => {
-                if (!dragging) return;
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                container.style.left = (origLeft + dx) + 'px';
-                container.style.top = (origTop + dy) + 'px';
-            });
-
-            document.addEventListener('pointerup', (e) => {
-                if (!dragging) return;
-                dragging = false;
-                container.classList.remove('dragging');
-                try { header.releasePointerCapture(e.pointerId); } catch (err) {}
-
-                // persist container position so it remains after reload
-                try {
-                    localStorage.setItem('swampert-container-pos', JSON.stringify({ left: toInt(container.style.left), top: toInt(container.style.top) }));
-                } catch (err) {}
-            });
-
-            // Keep container within viewport on window resize
-            window.addEventListener('resize', () => {
-                const vw = window.innerWidth;
-                const vh = window.innerHeight;
-                const rect = container.getBoundingClientRect();
-                let left = toInt(container.style.left);
-                let top = toInt(container.style.top);
-                left = Math.min(Math.max(0, left), Math.max(0, vw - rect.width));
-                top = Math.min(Math.max(0, top), Math.max(0, vh - rect.height));
-                container.style.left = left + 'px';
-                container.style.top = top + 'px';
-            });
-
-            // Apply saved container position (if present)
-            try {
-                const raw = localStorage.getItem('swampert-container-pos');
-                if (raw) {
-                    const pos = JSON.parse(raw);
-                    const vw = window.innerWidth;
-                    const vh = window.innerHeight;
-                    const rect = container.getBoundingClientRect();
-                    let left = Math.min(Math.max(0, pos.left), Math.max(0, vw - rect.width));
-                    let top = Math.min(Math.max(0, pos.top), Math.max(0, vh - rect.height));
-                    container.style.position = 'absolute';
-                    container.style.margin = '0';
-                    container.style.left = left + 'px';
-                    container.style.top = top + 'px';
-                }
-            } catch (err) {}
-
-            // Apply saved container size (if present)
-            try {
-                const rawSize = localStorage.getItem('swampert-container-size');
-                if (rawSize) {
-                    const sz = JSON.parse(rawSize);
-                    if (sz.width) container.style.width = sz.width + 'px';
-                    if (sz.height) container.style.height = sz.height + 'px';
-                }
-            } catch (err) {}
-
-            // Persist container size when the user resizes it
-            try {
-                const ro = new ResizeObserver(entries => {
-                    for (const ent of entries) {
-                        const cr = ent.contentRect;
-                        try { localStorage.setItem('swampert-container-size', JSON.stringify({ width: Math.round(cr.width), height: Math.round(cr.height) })); } catch (e) {}
-                    }
-                });
-                ro.observe(container);
-            } catch (e) {}
-
-            // Reset position button
-            const resetPosBtn = document.getElementById('resetPosBtn');
-            if (resetPosBtn) {
-                resetPosBtn.addEventListener('click', () => {
-                    try { localStorage.removeItem('swampert-container-pos'); } catch (e) {}
-                    try { localStorage.removeItem('swampert-container-size'); } catch (e) {}
-                    try { localStorage.removeItem('swampert-messages-size'); } catch (e) {}
-                    container.style.position = '';
-                    container.style.left = '';
-                    container.style.top = '';
-                    container.style.margin = '';
-                    container.style.width = '';
-                    container.style.height = '';
-                    const msgs = document.getElementById('chatMessages');
-                    if (msgs) { msgs.style.width = ''; msgs.style.height = ''; }
-                });
-            }
-        })();
-    </script>
+      } catch (err) {
+        addMessage("Network error: " + err.message, "bot");
+      } finally {
+        sendBtn.disabled = false;
+        messageInput.focus();
+      }
+    }
+  </script>
 </body>
 </html>
